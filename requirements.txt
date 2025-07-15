@@ -1,7 +1,9 @@
 streamlit
 ffmpeg-python
 SpeechRecognition
-googletrans==4.0.0-rc1
+googletrans==3.1.0-alpha
 gtts
 python-docx
 yt-dlp
+httpx==0.24.1
+httpcore==0.17.3
