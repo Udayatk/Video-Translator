@@ -2,7 +2,7 @@
 import streamlit as st
 import ffmpeg
 import speech_recognition as sr
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 from gtts import gTTS
 from docx import Document
 from docx.shared import Pt
@@ -28,13 +28,19 @@ def transcribe_audio(audio_path):
         return ""
 
 # Function to translate text into a target language
-def translate_text(text, target_lang, translator, chunk_size=200):
+def translate_text(text, target_lang, chunk_size=200):
     sentences = text.split(". ")
     translated_sentences = []
     for i in range(0, len(sentences), chunk_size):
         chunk = ". ".join(sentences[i:i+chunk_size])
-        translated_chunk = translator.translate(chunk, dest=target_lang).text
-        translated_sentences.append(translated_chunk)
+        if chunk.strip():  # Only translate non-empty chunks
+            try:
+                translator = GoogleTranslator(source='en', target=target_lang)
+                translated_chunk = translator.translate(chunk)
+                translated_sentences.append(translated_chunk)
+            except Exception as e:
+                st.error(f"Translation error: {e}")
+                translated_sentences.append(chunk)  # Fallback to original text
     return " ".join(translated_sentences)
 
 # Function to generate voiceover audio from translated text
@@ -127,8 +133,6 @@ if st.button("Translate & Generate"):
         else:
             video_path = download_youtube_video(video_url)
 
-        # Initialize translator
-        translator = Translator()
         # Extract audio and transcribe it
         audio_path = extract_audio(video_path)
         transcript = transcribe_audio(audio_path)
@@ -137,7 +141,7 @@ if st.button("Translate & Generate"):
         translated_video_paths = []
         # Loop through selected languages for translation and voiceover
         for lang_code in target_languages:
-            translated_text = translate_text(transcript, lang_code, translator)
+            translated_text = translate_text(transcript, lang_code)
             translations.append(translated_text)
 
             voiceover_path = generate_voiceover(translated_text, lang_code)
