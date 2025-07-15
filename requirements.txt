@@ -1,0 +1,7 @@
+streamlit
+ffmpeg-python
+SpeechRecognition
+googletrans==4.0.0-rc1
+gtts
+python-docx
+yt-dlp
